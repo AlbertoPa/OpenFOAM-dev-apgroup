@@ -69,6 +69,7 @@ turbulentDispersionModels/constantTurbulentDispersionCoefficient/constantTurbule
 turbulentDispersionModels/Burns/Burns.C
 turbulentDispersionModels/Gosman/Gosman.C
 turbulentDispersionModels/LopezDeBertodano/LopezDeBertodano.C
+turbulentDispersionModels/Panicker/Panicker.C
 
 aspectRatioModels/aspectRatioModel/aspectRatioModel.C
 aspectRatioModels/aspectRatioModel/aspectRatioModelNew.C
