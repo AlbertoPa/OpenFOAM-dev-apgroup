@@ -91,7 +91,10 @@ class constantbXiIgnition
 :
     public bXiIgnition
 {
-    // Private Data
+
+protected:
+
+    // Protected Data
 
         //- The set of ignition cells
         fvCellSet set_;
@@ -107,6 +110,8 @@ class constantbXiIgnition
         //- Ignition strength
         dimensionedScalar strength_;
 
+
+private:
 
     // Private Member Functions
 
@@ -142,8 +147,10 @@ public:
 
         // Checks
 
+            //- Return true during the ignition duration
             virtual bool igniting() const;
 
+            //- Return true during the combustion duration
             virtual bool ignited() const;
 
 

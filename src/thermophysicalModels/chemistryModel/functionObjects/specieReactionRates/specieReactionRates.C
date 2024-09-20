@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Copyright (C) 2016-2023 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2024 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,9 @@ namespace functionObjects
 void Foam::functionObjects::specieReactionRates::writeFileHeader(const label i)
 {
     writeHeader(file(), "Specie reaction rates");
+
     fvCellSet::writeFileHeader(*this, file());
+
     writeHeaderValue(file(), "nSpecie", chemistryModel_.nSpecie());
     writeHeaderValue(file(), "nReaction", chemistryModel_.nReaction());
 
@@ -81,13 +83,15 @@ Foam::functionObjects::specieReactionRates::specieReactionRates
     fvMeshFunctionObject(name, runTime, dict),
     fvCellSet(fvMeshFunctionObject::mesh_, dict),
     logFiles(obr_, name),
+    phaseName_(dict.lookupOrDefault<word>("phase", word::null)),
     chemistryModel_
     (
         fvMeshFunctionObject::mesh_.lookupObject<basicChemistryModel>
         (
-            "chemistryProperties"
+            IOobject::groupName("chemistryProperties", phaseName_)
         )
-    )
+    ),
+    writeFields_(false)
 {
     read(dict);
 }
@@ -104,6 +108,8 @@ Foam::functionObjects::specieReactionRates::~specieReactionRates()
 bool Foam::functionObjects::specieReactionRates::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
+
+    writeFields_ = dict.lookupOrDefault<bool>("writeFields", false);
 
     resetName("specieReactionRates");
 
@@ -137,9 +143,10 @@ bool Foam::functionObjects::specieReactionRates::write()
 
         const PtrList<volScalarField::Internal> RR
         (
-            chemistryModel_.reactionRR(reactioni)
+            chemistryModel_.specieReactionRR(reactioni)
         );
 
+        // Compute the average rates and write them into the log file
         for (label speciei=0; speciei<nSpecie; speciei++)
         {
             scalar sumVRRi = 0;
@@ -171,11 +178,20 @@ bool Foam::functionObjects::specieReactionRates::write()
         {
             file() << nl;
         }
+
+        // Write the rate fields, if necessary
+        if (writeFields_)
+        {
+            for (label speciei=0; speciei<nSpecie; speciei++)
+            {
+                RR[speciei].write();
+            }
+        }
     }
 
     if (Pstream::master())
     {
-        file() << nl << endl;
+        file() << endl;
     }
 
     return true;

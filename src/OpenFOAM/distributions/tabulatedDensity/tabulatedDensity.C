@@ -57,9 +57,14 @@ Foam::distributions::tabulatedDensity::tabulatedDensity
         dict,
         sampleQ,
         std::move(rndGen)
+    ),
+    reader_
+    (
+        TableReader<scalar>::New(word::null, {defaultUnits, unitNone}, dict)
     )
 {
-    List<Tuple2<scalar, scalar>> values(dict.lookup("distribution"));
+    List<Tuple2<scalar, scalar>> values =
+        reader_->read({defaultUnits, unitNone}, dict, "distribution");
 
     // Checks
     forAll(values, i)
@@ -79,15 +84,11 @@ Foam::distributions::tabulatedDensity::tabulatedDensity
         }
     }
 
-    // Optionally read units
-    unitConversion units(defaultUnits);
-    units.readIfPresent("units", dict);
-
     // Copy the coordinates
     x_.resize(values.size());
     forAll(values, i)
     {
-        x_[i] = units.toStandard(values[i].first());
+        x_[i] = values[i].first();
     }
 
     // Copy the PDF. Scale if q != 0.
@@ -118,6 +119,7 @@ Foam::distributions::tabulatedDensity::tabulatedDensity
 )
 :
     FieldDistribution<distribution, tabulatedDensity>(d, sampleQ),
+    reader_(d.reader_, false),
     x_(d.x_),
     PDF_(d.PDF_),
     CDF_(d.CDF_)
@@ -169,38 +171,14 @@ Foam::scalar Foam::distributions::tabulatedDensity::mean() const
 
 
 Foam::tmp<Foam::scalarField>
-Foam::distributions::tabulatedDensity::CDF(const scalarField& x) const
+Foam::distributions::tabulatedDensity::integralPDFxPow
+(
+    const scalarField& x,
+    const label e,
+    const bool
+) const
 {
-    tmp<scalarField> tResult(new scalarField(x.size()));
-    scalarField& result = tResult.ref();
-
-    label i = 0;
-
-    while (i < x.size() && x[i] < x_[0])
-    {
-        result[i] = 0;
-        i ++;
-    }
-
-    for (label j = 0; j < x_.size() - 1; ++ j)
-    {
-        while (i < x.size() && x[i] < x_[j + 1])
-        {
-            result[i] =
-                CDF_[j]
-              + PDF_[j]*(x[i] - x_[j])
-              + (PDF_[j + 1] - PDF_[j])/(x_[j + 1] - x_[j])/2*sqr(x[i] - x_[j]);
-            i ++;
-        }
-    }
-
-    while (i < x.size())
-    {
-        result[i] = 1;
-        i ++;
-    }
-
-    return tResult;
+    return unintegrable::interpolateIntegrateXPow(x_, e, PDF_, x);
 }
 
 
@@ -222,17 +200,15 @@ void Foam::distributions::tabulatedDensity::write
     List<Tuple2<scalar, scalar>> values(PDF_.size());
     forAll(values, i)
     {
-        values[i].first() = units.toUser(x_[i]);
+        values[i].first() = x_[i];
         values[i].second() = PDF[i];
     }
-    writeEntry(os, "distribution", values);
+    reader_->write(os, {units, unitNone}, values, "distribution");
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::distributions::tabulatedDensity::plotX
-(
-    const label
-) const
+Foam::tmp<Foam::scalarField>
+Foam::distributions::tabulatedDensity::plotX(const label) const
 {
     const scalar x0 = min(), x1 = max(), d = 0.1*(x1 - x0);
 

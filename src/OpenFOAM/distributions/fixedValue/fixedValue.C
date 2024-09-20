@@ -44,14 +44,14 @@ Foam::distributions::fixedValue::fixedValue
 (
     const unitConversion& units,
     const dictionary& dict,
-    const label,
+    const label sampleQ,
     randomGenerator&& rndGen
 )
 :
     FieldDistribution<distribution, fixedValue>
     (
         -labelMax,
-        -labelMax,
+        sampleQ,
         std::move(rndGen)
     ),
     value_(dict.lookup<scalar>("value", units))
@@ -101,10 +101,14 @@ Foam::scalar Foam::distributions::fixedValue::mean() const
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::distributions::fixedValue::CDF(const scalarField& x) const
+Foam::tmp<Foam::scalarField> Foam::distributions::fixedValue::integralPDFxPow
+(
+    const scalarField& x,
+    const label e,
+    const bool
+) const
 {
-    return pos(x - value_);
+    return pos(x - value_)*integerPow(value_, e);
 }
 
 
@@ -114,8 +118,7 @@ void Foam::distributions::fixedValue::write
     const unitConversion& units
 ) const
 {
-    FieldDistribution<distribution, fixedValue>::write(os, units);
-
+    writeEntry(os, "type", type());
     writeEntry(os, "value", units, value_);
 }
 

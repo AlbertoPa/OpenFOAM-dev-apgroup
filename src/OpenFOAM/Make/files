@@ -101,6 +101,7 @@ primitives/functions/Function1/quarterSineRamp/quarterSineRamp.C
 primitives/functions/Function1/quarterCosineRamp/quarterCosineRamp.C
 primitives/functions/Function1/halfCosineRamp/halfCosineRamp.C
 primitives/functions/Function1/exponentialSqrRamp/exponentialSqrRamp.C
+primitives/functions/Function1/normalise/normalise.C
 primitives/functions/Function1/squarePulse/squarePulse.C
 primitives/functions/Function1/Table/tableBase.C
 primitives/functions/Function1/Table/TableReader/makeTableReaders.C
@@ -284,6 +285,7 @@ db/functionObjects/writeObjectsBase/writeObjectsBase.C
 db/functionObjects/writeLocalObjects/writeLocalObjects.C
 db/functionObjects/timeControl/timeControl.C
 db/functionObjects/timeControl/timeControlFunctionObject.C
+db/functionObjects/objectRegistryFunctionObject/objectRegistryFunctionObject.C
 db/functionObjects/regionFunctionObject/regionFunctionObject.C
 
 Time = db/Time
@@ -728,6 +730,7 @@ distributions/unintegrable/unintegrable.C
 distributions/unintegrable/unintegrableForNonZeroQ.C
 distributions/exponential/exponential.C
 distributions/fixedValue/fixedValue.C
+distributions/multiFixedValue/multiFixedValue.C
 distributions/multiNormal/multiNormal.C
 distributions/normal/normal.C
 distributions/RosinRammler/RosinRammler.C
