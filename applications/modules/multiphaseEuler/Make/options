@@ -15,6 +15,7 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lfluidSolver \
+    -lphaseSystem \
     -lphaseSystems \
     -lmultiphaseEulerReactions \
     -lfvModels \

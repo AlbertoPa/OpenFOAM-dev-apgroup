@@ -5,8 +5,11 @@
     \\  /    A nd           | Copyright (C) 2015-2023 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+Copyright (C) 2023-2024 Alberto Passalacqua (apcfd@outlook.com)
+    - Added pseudoturbulence model.
+-------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is derivative work of OpenFOAM.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
@@ -80,6 +83,15 @@ Foam::AnisothermalPhaseModel<BasePhaseModel>::AnisothermalPhaseModel
             phaseCompressible::momentumTransportModel,
             transportThermoModel
         >::New(this->momentumTransport_, this->thermo_)
+    ),
+    pseudoTurbulenceHeatTransfer_
+    (
+        pseudoTurbulentHeatTransferModel::New
+        (
+            this->momentumTransport_().subDict("pseudoTurbulence"),
+            *this,
+            this->pseudoTurbulence_
+        )
     )
 {}
 
@@ -124,6 +136,7 @@ correctThermophysicalTransport()
 {
     BasePhaseModel::correctThermophysicalTransport();
     thermophysicalTransport_->correct();
+    pseudoTurbulenceHeatTransfer_->correct();
 }
 
 

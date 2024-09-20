@@ -5,8 +5,11 @@
     \\  /    A nd           | Copyright (C) 2015-2023 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+Copyright (C) 2023-2024 Alberto Passalacqua (apcfd@outlook.com)
+    - Added pseudoturbulence model.
+-------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is derivative work of OpenFOAM.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
@@ -47,6 +50,7 @@ SourceFiles
 
 #include "phaseModel.H"
 #include "phaseCompressibleMomentumTransportModel.H"
+#include "pseudoTurbulentMomentumModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,6 +90,9 @@ protected:
 
         //- Turbulence model
         autoPtr<phaseCompressible::momentumTransportModel> momentumTransport_;
+
+        //- Pseudoturbulence momentum model
+        autoPtr<pseudoTurbulentMomentumModel> pseudoTurbulence_;
 
         //- Continuity error
         volScalarField continuityError_;

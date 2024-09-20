@@ -5,8 +5,11 @@
     \\  /    A nd           | Copyright (C) 2015-2023 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+Copyright (C) 2023-2024 Alberto Passalacqua (apcfd@outlook.com)
+    - Added pseudoturbulence model.
+-------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
+    This file is derivative work of OpenFOAM.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
@@ -175,6 +178,14 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
             *this
         )
     ),
+    pseudoTurbulence_
+    (
+        pseudoTurbulentMomentumModel::New
+        (
+            momentumTransport_().subDict("pseudoTurbulence"),
+            *this
+        )
+    ),
     continuityError_
     (
         IOobject
@@ -262,6 +273,7 @@ void Foam::MovingPhaseModel<BasePhaseModel>::correctMomentumTransport()
 {
     BasePhaseModel::correctMomentumTransport();
     momentumTransport_->correct();
+    pseudoTurbulence_->correct();
 }
 
 
@@ -305,6 +317,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::UEqn()
       + fvm::SuSp(-this->continuityError(), U_)
       + this->fluid().MRF().DDt(alpha*rho, U_)
       + momentumTransport_->divDevTau(U_)
+      + pseudoTurbulence_->divRpt()
     );
 }
 
